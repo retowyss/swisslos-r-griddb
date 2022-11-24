@@ -229,11 +229,11 @@ We can clearly see a positive correlation between jackpot size and the number of
 cor.test(three_correct_jp$tickets_played, three_correct_jp$jackpot)
 ```
 
-(To answer this question in a simple manner, we assumed that people play their 6 out 42 completely randomly. They don't; but the effect should be small enough to not interfer with our ability to gauge the number of players.)
+(To answer this question in a simple manner, we assumed that people play their 6 out 42 completely randomly. They don't; but the effect should be small enough to not interfere with our ability to gauge the number of players.)
 
 ### Which is the most frequently played Lucky Number?
 
-To find the most frequently played Lucky Number, we compare the counts of the winning combinations of three out of six without Lucky Number to the count of combinations that got the Lucky Number right. We can get the correct Lucky Number from our dataset, and so for each Lucky Number we now have a bunch of point estimators, which we can show in a boxplot. 
+To find the most frequently played _Lucky Number_, we compare the counts of the winning combinations of three out of six without _Lucky Number_ to the count of combinations that got the _Lucky Number_ right. We can get the correct _Lucky Number_ from our dataset, and so for each _Lucky Number_ we now have a bunch of point estimators, which we can show in a boxplot. 
 
 ```{r}
 # Again, when writing straight SQL which is required for GridDB at the moment,
@@ -298,7 +298,7 @@ lucky_counts %>%
   geom_hline(yintercept = 1/6)
 ```
 
-Clearly, the Swiss love 3 and hate 1 as their _Lucky Number_.
+Clearly, the Swiss love 3 and hate 1 for their _Lucky Number_.
 
 ### Which are the most frequently played standard numbers?
 
