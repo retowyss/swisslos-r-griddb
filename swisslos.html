@@ -377,7 +377,7 @@ than the average lottery player; you’d still lose money.</p>
 <div id="data-overview-and-analysis-tools" class="section level2">
 <h2>Data Overview and Analysis Tools</h2>
 <p>We analyze approximately seven years of weekly lottery drawings (n =
-720) from Swisslos, the national lottery of Switzerland, using the
+720) from “Swisslos,” the national lottery of Switzerland, using the
 statistical programming language R, and we use GridDB for our data
 storage.</p>
 <pre class="r"><code># Required packages RJDBC and tidyverse 
@@ -389,7 +389,7 @@ drv &lt;- JDBC(
   classPath = &quot;/jdbc/bin/gridstore-jdbc.jar&quot;
 )
 
-# IP, cluster, database and port depend on your setup
+# IP and port depend on your setup
 griddb &lt;- dbConnect(
   drv, 
   &quot;jdbc:gs://172.20.0.42:20001/dockerGridDB/public&quot;, 
@@ -508,7 +508,7 @@ swisslos_regular_combos &lt;- bin(regular_numbers, regular_draws)</code></pre>
 <p>There are 5245786 ways to choose six from 42, factoring in the
 <em>Lucky Number</em> there are 31474716 combinations. Similarly, we can
 calculate the combinations of three, four, and five with or without the
-<em>Lucky Number</em>.</p>
+lucky number.</p>
 <p>So, we can calculate the probabilities.</p>
 <pre class="r"><code># probability to get n correct
 swisslos_prob &lt;- function(n) {
@@ -662,11 +662,12 @@ number of players.)</p>
 <div id="which-is-the-most-frequently-played-lucky-number" class="section level3">
 <h3>Which is the most frequently played Lucky Number?</h3>
 <p>To find the most frequently played <em>Lucky Number</em>, we compare
-the counts of the winning combinations of three out of six without Lucky
-Number to the count of combinations that got the <em>Lucky Number</em>
-right. We can get the correct <em>Lucky Number</em> from our dataset,
-and so for each <em>Lucky Number</em> we now have a bunch of point
-estimators, which we can show in a boxplot.</p>
+the counts of the winning combinations of three out of six without
+<em>Lucky Number</em> to the count of combinations that got the
+<em>Lucky Number</em> right. We can get the correct <em>Lucky
+Number</em> from our dataset, and so for each <em>Lucky Number</em> we
+now have a bunch of point estimators, which we can show in a
+boxplot.</p>
 <pre class="r"><code># Again, when writing straight SQL which is required for GridDB at the moment,
 # we want to make it as easy as possible for ourselves.
 # break SQL down into easy to understand snippets and combine

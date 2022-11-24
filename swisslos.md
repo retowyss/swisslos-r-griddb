@@ -20,7 +20,7 @@ So, it is true that some numbers will make more money in the long run. By making
 
 ## Data Overview and Analysis Tools
 
-We analyze approximately seven years of weekly lottery drawings (n = 720) from Swisslos, the national lottery of Switzerland, using the statistical programming language R, and we use GridDB for our data storage.
+We analyze approximately seven years of weekly lottery drawings (n = 720) from "Swisslos," the national lottery of Switzerland, using the statistical programming language R, and we use GridDB for our data storage.
 
 
 ```r
@@ -33,7 +33,7 @@ drv <- JDBC(
   classPath = "/jdbc/bin/gridstore-jdbc.jar"
 )
 
-# IP, cluster, database and port depend on your setup
+# IP and port depend on your setup
 griddb <- dbConnect(
   drv, 
   "jdbc:gs://172.20.0.42:20001/dockerGridDB/public", 
@@ -164,7 +164,7 @@ bin <- function(a, b) {
 swisslos_regular_combos <- bin(regular_numbers, regular_draws)
 ```
 
-There are 5245786 ways to choose six from 42, factoring in the _Lucky Number_ there are 31474716 combinations. Similarly, we can calculate the combinations of three, four, and five with or without the _Lucky Number_. 
+There are 5245786 ways to choose six from 42, factoring in the _Lucky Number_ there are 31474716 combinations. Similarly, we can calculate the combinations of three, four, and five with or without the lucky number. 
 
 So, we can calculate the probabilities.
 
@@ -299,7 +299,7 @@ cor.test(three_correct_jp$tickets_played, three_correct_jp$jackpot)
 
 ### Which is the most frequently played Lucky Number?
 
-To find the most frequently played _Lucky Number_, we compare the counts of the winning combinations of three out of six without Lucky Number to the count of combinations that got the _Lucky Number_ right. We can get the correct _Lucky Number_ from our dataset, and so for each _Lucky Number_ we now have a bunch of point estimators, which we can show in a boxplot. 
+To find the most frequently played _Lucky Number_, we compare the counts of the winning combinations of three out of six without _Lucky Number_ to the count of combinations that got the _Lucky Number_ right. We can get the correct _Lucky Number_ from our dataset, and so for each _Lucky Number_ we now have a bunch of point estimators, which we can show in a boxplot. 
 
 
 ```r
