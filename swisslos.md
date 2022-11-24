@@ -7,24 +7,7 @@ output:
     keep_md: yes
 ---
 
-```{r setup, include=FALSE}
-library(tidyverse)
-library(RJDBC)
-options(scipen = 999)
 
-# Important!!
-# if you want to add the data to your, run the next chunk (eval = FALSE)
-# alternative run the script R/swisslos_load.R
-
-drv <- JDBC(
-  driverClass = "com.toshiba.mwcloud.gs.sql.Driver",
-  classPath = "/jdbc/bin/gridstore-jdbc.jar"
-)
-
-griddb <- dbConnect(drv, "jdbc:gs://172.20.0.42:20001/dockerGridDB/public", "admin", "admin")
-
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 A superstitious person will believe they are more likely to win the lottery by playing their lucky numbers. They believe there is a greater chance that their chosen numbers will be drawn. 
 
@@ -39,7 +22,8 @@ So, it is true that some numbers will make more money in the long run. By making
 
 We analyze approximately seven years of weekly lottery drawings (n = 720) from "Swisslos," the national lottery of Switzerland, using the statistical programming language R, and we use GridDB for our data storage.
 
-```{r eval=FALSE}
+
+```r
 # Required packages RJDBC and tidyverse 
 # griddb is the connection object to our GridDB
 
@@ -85,8 +69,13 @@ dbSendUpdate(griddb, paste(
 dbInsertTable(griddb, "swisslos_numbers", read_csv("data/swisslos_numbers.csv"))
 ```
 
-```{r}
+
+```r
 dbListTables(griddb)
+```
+
+```
+## [1] "swisslos_jackpots" "swisslos_numbers"  "swisslos_payouts"
 ```
 
   
@@ -103,7 +92,8 @@ dbListTables(griddb)
     3. prize: payout (CHF) per winner
     4. date
 
-```{r}
+
+```r
 # stringr::str_interp is a handy function to parameterize SQL queries from R
 # just be careful; SQL injections happen.
 show_date <- function(conn, table, date = "2013-02-13") {
@@ -113,11 +103,40 @@ show_date <- function(conn, table, date = "2013-02-13") {
 map(dbListTables(griddb), ~ show_date(griddb, .))
 ```
 
+```
+## [[1]]
+##         date jackpot
+## 1 2013-02-13 8600000
+## 
+## [[2]]
+##     type number       date
+## 1 normal     13 2013-02-13
+## 2 normal     21 2013-02-13
+## 3 normal     25 2013-02-13
+## 4 normal     26 2013-02-13
+## 5 normal     32 2013-02-13
+## 6 normal     40 2013-02-13
+## 7  lucky      1 2013-02-13
+## 8 replay     13 2013-02-13
+## 
+## [[3]]
+##   combination winners   prize       date
+## 1       6 + 1       0    0.00 2013-02-13
+## 2           6       0    0.00 2013-02-13
+## 3       5 + 1       6 7570.15 2013-02-13
+## 4           5      36 1000.00 2013-02-13
+## 5       4 + 1     283  208.90 2013-02-13
+## 6           4    1690   87.35 2013-02-13
+## 7       3 + 1    4681   31.85 2013-02-13
+## 8           3   28264   10.55 2013-02-13
+```
+
 ## Swisslos rules and probabilities
 
 To play Swisslos, you choose six numbers between 1 and 42 and a single _Lucky Number_ between 1 and 6. 
 
-```{r}
+
+```r
 regular_numbers <- 42
 regular_draws   <- 6
 lucky_numbers   <- 6
@@ -126,7 +145,8 @@ lucky_draws     <- 1
 
 We can compute the number of possible combinations as follows. Of course, the _Lucky Number_ increases the number of combinations by a factor of six.
 
-```{r}
+
+```r
 # Binomial coefficient function
 # Bin(a, b)
 bin <- function(a, b) {
@@ -144,11 +164,12 @@ bin <- function(a, b) {
 swisslos_regular_combos <- bin(regular_numbers, regular_draws)
 ```
 
-There are `r swisslos_regular_combos` ways to choose six from 42, factoring in the _Lucky Number_ there are `r swisslos_regular_combos * 6` combinations. Similarly, we can calculate the combinations of three, four, and five with or without the lucky number. 
+There are 5245786 ways to choose six from 42, factoring in the _Lucky Number_ there are 31474716 combinations. Similarly, we can calculate the combinations of three, four, and five with or without the lucky number. 
 
 So, we can calculate the probabilities.
 
-```{r}
+
+```r
 # probability to get n correct
 swisslos_prob <- function(n) {
   n_match <- bin(regular_draws, n)
@@ -167,15 +188,28 @@ tibble(n_correct = 0:6) %>%
   knitr::kable(digits = 8)
 ```
 
+
+
+| n_correct|  prob_base| prob_lucky| prob_not_lucky|
+|---------:|----------:|----------:|--------------:|
+|         0| 0.37130603| 0.06188434|     0.30942170|
+|         1| 0.43119411| 0.07186568|     0.35932842|
+|         2| 0.16843520| 0.02807253|     0.14036266|
+|         3| 0.02722185| 0.00453698|     0.02268488|
+|         4| 0.00180145| 0.00030024|     0.00150120|
+|         5| 0.00004118| 0.00000686|     0.00003431|
+|         6| 0.00000019| 0.00000003|     0.00000016|
+
 Funny note: It's more likely to get one right (~43%) than none (~37%). It's counter-intuitve and parallel to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem).
 
 ## Analysis
 
 ### How many people play Swisslos every week?
 
-Given that chance to get three out of six is `r round(swisslos_prob(3) * 100, 2)`%, we can estimate the number of people that play Swisslos (actually, we estimate the number of played tickets).
+Given that chance to get three out of six is 2.72%, we can estimate the number of people that play Swisslos (actually, we estimate the number of played tickets).
 
-```{r}
+
+```r
 # To retrieve the data from GridDB we type a SQL query
 # Computing the result with SQL makes it unnecessary to pull the entire table
 # into R
@@ -202,17 +236,32 @@ three_correct <- get_n_correct(griddb, 3) %>%
 three_correct %>% head(5)
 ```
 
+```
+## # A tibble: 5 × 3
+##   winners date       tickets_played
+##     <dbl> <chr>               <dbl>
+## 1   60705 2013-01-12       2230010.
+## 2   33745 2013-01-16       1239629.
+## 3   43457 2013-01-19       1596401.
+## 4   35013 2013-01-23       1286209.
+## 5   48120 2013-01-26       1767698.
+```
+
 We can now plot the number of tickets that have been played over time, 
 
-```{r,  fig.width=12}
+
+```r
 three_correct %>% 
   ggplot(aes(x = lubridate::as_date(date), y = tickets_played)) + 
   geom_col()
 ```
 
+![](swisslos_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 but maybe more interestingly, we can plot the number of tickets against the jackpot.
 
-```{r}
+
+```r
 # You can test your SQL here, but because we need to get the entire 
 # swisslos_jackpots table, we might just as well join it in R
 three_correct_jp <- three_correct %>% 
@@ -223,10 +272,27 @@ three_correct_jp %>%
   geom_point()
 ```
 
+![](swisslos_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
 We can clearly see a positive correlation between jackpot size and the number of tickets played.
 
-```{r}
+
+```r
 cor.test(three_correct_jp$tickets_played, three_correct_jp$jackpot)
+```
+
+```
+## 
+## 	Pearson's product-moment correlation
+## 
+## data:  three_correct_jp$tickets_played and three_correct_jp$jackpot
+## t = 33.147, df = 718, p-value < 0.00000000000000022
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.7470597 0.8050008
+## sample estimates:
+##       cor 
+## 0.7776764
 ```
 
 (To answer this question in a simple manner, we assumed that people play their 6 out 42 completely randomly. They don't; but the effect should be small enough to not interfer with our ability to gauge the number of players.)
@@ -235,7 +301,8 @@ cor.test(three_correct_jp$tickets_played, three_correct_jp$jackpot)
 
 To find the most frequently played Lucky Number, we compare the counts of the winning combinations of three out of six without Lucky Number to the count of combinations that got the Lucky Number right. We can get the correct Lucky Number from our dataset, and so for each Lucky Number we now have a bunch of point estimators, which we can show in a boxplot. 
 
-```{r}
+
+```r
 # Again, when writing straight SQL which is required for GridDB at the moment,
 # we want to make it as easy as possible for ourselves.
 # break SQL down into easy to understand snippets and combine
@@ -291,12 +358,25 @@ lucky_counts <- get_n_lucky(griddb, 3) %>%
   mutate(lucky_p = lucky_count / winners_count)
 
 head(lucky_counts, n = 5)
+```
 
+```
+##   winners_count lucky_count lucky_number       date   lucky_p
+## 1         60705        9174            4 2013-01-12 0.1511243
+## 2         33745        5005            4 2013-01-16 0.1483183
+## 3         43457        5810            6 2013-01-19 0.1336954
+## 4         35013        6326            2 2013-01-23 0.1806757
+## 5         48120       10718            3 2013-01-26 0.2227348
+```
+
+```r
 lucky_counts %>% 
   ggplot(aes(x = factor(lucky_number), y = lucky_p, group = lucky_number)) + 
   geom_boxplot() +
   geom_hline(yintercept = 1/6)
 ```
+
+![](swisslos_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 Clearly, the Swiss love 3 and hate 1 as their _Lucky Number_.
 
@@ -304,9 +384,10 @@ Clearly, the Swiss love 3 and hate 1 as their _Lucky Number_.
 
 This is a hard question. We'll show a fairly straight forward an hacky approach and invite you to devise a better way.
 
-Consider that the factor between the probabilities of four correct and three correct is `r round(swisslos_prob(3) / swisslos_prob(4), 2)`. So, if in our data we find that the factor between the counts of four correct and three correct is greater, then the drawn numbers (on average) are slightly less likely to be played and if the factor is lesser then the played numbers are more likely to be played.
+Consider that the factor between the probabilities of four correct and three correct is 15.11. So, if in our data we find that the factor between the counts of four correct and three correct is greater, then the drawn numbers (on average) are slightly less likely to be played and if the factor is lesser then the played numbers are more likely to be played.
 
-```{r}
+
+```r
 # We can do all of this directly on our GridDB
 # After we calculate the bias using the empirical frequencies and our
 # swisslos_prob function, we combine the table with the numbers table and
@@ -363,21 +444,39 @@ hacky <- get_3_and_4(griddb)
 head(hacky)
 ```
 
+```
+##   number       bias
+## 1      1 -0.4834515
+## 2      2 -0.1532164
+## 3      3 -0.4042146
+## 4      4 -0.2777778
+## 5      5 -0.3198068
+## 6      6 -0.4269006
+```
+
 So we can do a bit of hacky stuff, and then come up with this.
 
-```{r, fig.width=12}
+
+```r
 # Centering and negating bias to make it look prettier
 ggplot(hacky, aes(x = factor(number), y = -(bias - mean(bias)), fill = -bias)) + geom_col() +
   scale_fill_viridis_c() +
   theme(legend.position = "none")
 ```
 
+![](swisslos_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
 It's hard to say how accurate this is, but it makes sense. Numbers between 1 and 12,
 and 1 and 31 make birthdays. We can also see that 11, 22, and 33 are popular. 
 
 So, which numbers should you play? None, because you'll lose money in the long run.
 
-```{r}
+
+```r
 dbDisconnect(griddb)
+```
+
+```
+## [1] TRUE
 ```
 
