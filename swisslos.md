@@ -307,7 +307,7 @@ To find the most frequently played _Lucky Number_, we compare the counts of the 
 # we want to make it as easy as possible for ourselves.
 # break SQL down into easy to understand snippets and combine
 # I think it's a good idea to avoid nested str_interp and only use them 
-# for R compuation
+# for R computation
 get_n_lucky <- function(conn, n) {
   # Add lucky and regular winners for n
   q_combined_counts <- paste(
