@@ -20,7 +20,7 @@ So, it is true that some numbers will make more money in the long run. By making
 
 ## Data Overview and Analysis Tools
 
-We analyze approximately seven years of weekly lottery drawings (n = 720) from "Swisslos," the national lottery of Switzerland, using the statistical programming language R, and we use GridDB for our data storage.
+We analyze approximately seven years of lottery drawings (n = 720, start = 2013-01-12, end = 2019-12-04) from "Swisslos," the national lottery of Switzerland, using the statistical programming language R, and we use GridDB for our data storage.
 
 
 ```r
