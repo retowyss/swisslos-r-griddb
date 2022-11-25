@@ -26,7 +26,7 @@ griddb <- dbConnect(drv, "jdbc:gs://172.20.0.42:20001/dockerGridDB/public", "adm
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-A superstitious person will believe they are more likely to win the lottery by playing their lucky numbers. They believe there is a greater chance that their chosen numbers will be drawn. 
+A superstitious person may believe they are more likely to win the lottery by playing their lucky numbers. They believe there is a greater chance that their chosen numbers will be drawn. 
 
 Of course, unless the lottery is rigged, that is not the case. Most will 
 realize that every number and every combination of numbers has the same likelihood. However - and this is the exciting part - not every combination has the same expected value.
