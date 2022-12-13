@@ -110,7 +110,8 @@ show_date <- function(conn, table, date = "2013-02-13") {
   dbGetQuery(conn, str_interp("SELECT * FROM ${table} WHERE date = '${date}';"))
 } 
 
-map(dbListTables(griddb), ~ show_date(griddb, .))
+#only show swisslos_ tables
+map(keep(dbListTables(griddb), ~ str_detect(., "swisslos_")), ~ show_date(griddb, .))
 ```
 
 ## Swisslos rules and probabilities
@@ -167,7 +168,7 @@ tibble(n_correct = 0:6) %>%
   knitr::kable(digits = 8)
 ```
 
-Funny note: It's more likely to get one right (~43%) than none (~37%). It's counter-intuitve and parallel to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem).
+Note: It's more likely to get one right (~43%) than none (~37%). It's counter-intuitve and parallel to the [birthday paradox](https://en.wikipedia.org/wiki/Birthday_problem).
 
 ## Analysis
 

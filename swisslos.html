@@ -452,7 +452,8 @@ show_date &lt;- function(conn, table, date = &quot;2013-02-13&quot;) {
   dbGetQuery(conn, str_interp(&quot;SELECT * FROM ${table} WHERE date = &#39;${date}&#39;;&quot;))
 } 
 
-map(dbListTables(griddb), ~ show_date(griddb, .))</code></pre>
+#only show swisslos_ tables
+map(keep(dbListTables(griddb), ~ str_detect(., &quot;swisslos_&quot;)), ~ show_date(griddb, .))</code></pre>
 <pre><code>## [[1]]
 ##         date jackpot
 ## 1 2013-02-13 8600000
@@ -580,8 +581,8 @@ tibble(n_correct = 0:6) %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Funny note: It’s more likely to get one right (~43%) than none
-(~37%). It’s counter-intuitve and parallel to the <a href="https://en.wikipedia.org/wiki/Birthday_problem">birthday
+<p>Note: It’s more likely to get one right (~43%) than none (~37%). It’s
+counter-intuitve and parallel to the <a href="https://en.wikipedia.org/wiki/Birthday_problem">birthday
 paradox</a>.</p>
 </div>
 <div id="analysis" class="section level2">
